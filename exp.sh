@@ -1,41 +1,136 @@
+script-rdp.sh
 #!/bin/bash
 
+# Menampilkan seni ASCII
+echo "░█████╗░██╗░░░██╗████████╗░█████╗░  ██╗███╗░░██╗░██████╗████████╗░█████╗░██╗░░░░░██╗░░░░░███████╗██████╗░"
+echo "██╔══██╗██║░░░██║╚══██╔══╝██╔══██╗  ██║████╗░██║██╔════╝╚══██╔══╝██╔══██╗██║░░░░░██║░░░░░██╔════╝██╔══██╗"
+echo "███████║██║░░░██║░░░██║░░░██║░░██║  ██║██╔██╗██║╚█████╗░░░░██║░░░███████║██║░░░░░██║░░░░░█████╗░░██████╔╝"
+echo "██╔══██║██║░░░██║░░░██║░░░██║░░██║  ██║██║╚████║░╚═══██╗░░░██║░░░██╔══██║██║░░░░░██║░░░░░██╔══╝░░██╔══██╗"
+echo "██║░░██║╚██████╔╝░░░██║░░░╚█████╔╝  ██║██║░╚███║██████╔╝░░░██║░░░██║░░██║███████╗███████╗███████╗██║░░██║"
+echo "╚═╝░░╚═╝░╚═════╝░░░░╚═╝░░░░╚════╝░  ╚═╝╚═╝░░╚══╝╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝╚══════╝╚══════╝╚══════╝╚═╝░░╚═╝"
+echo
+echo "░██████╗░█████╗░██████╗░██╗██████╗░████████╗"
+echo "██╔════╝██╔══██╗██╔══██╗██║██╔══██╗╚══██╔══╝"
+echo "╚█████╗░██║░░╚═╝██████╔╝██║██████╔╝░░░██║░░░"
+echo "░╚═══██╗██║░░██╗██╔══██╗██║██╔═══╝░░░░██║░░░"
+echo "██████╔╝╚█████╔╝██║░░██║██║██║░░░░░░░░██║░░░"
+echo "╚═════╝░░╚════╝░╚═╝░░╚═╝╚═╝╚═╝░░░░░░░░╚═╝░░░"
+echo
+echo "██████╗░██╗░░░██╗  ██████╗░███████╗███╗░░██╗███╗░░██╗███████╗░█████╗░███╗░░██╗███████╗"
+echo "██╔══██╗╚██╗░██╔╝  ██╔══██╗██╔════╝████╗░██║████╗░██║╚════██║██╔══██╗████╗░██║██╔════╝"
+echo "██████╦╝░╚████╔╝░  ██████╔╝█████╗░░██╔██╗██║██╔██╗██║░░███╔═╝██║░░██║██╔██╗██║█████╗░░"
+echo "██╔══██╗░░╚██╔╝░░  ██╔══██╗██╔══╝░░██║╚████║██║╚████║██╔══╝░░██║░░██║██║╚████║██╔══╝░░"
+echo "██████╦╝░░░██║░░░  ██║░░██║███████╗██║░╚███║██║░╚███║███████╗╚█████╔╝██║░╚███║███████╗"
+echo "╚═════╝░░░░╚═╝░░░  ╚═╝░░╚═╝╚══════╝╚═╝░░╚══╝╚═╝░░╚══╝╚══════╝░╚════╝░╚═╝░░╚══╝╚══════╝"
+echo
+
+# Function to display progress bar
+show_progress() {
+    local progress=$1
+    local total=$2
+    local percentage=$((progress * 100 / total))
+    printf "\rSetup process : [%-50s] %d%%" $(printf '#%.0s' $(seq 1 $((percentage / 2)))) $percentage
+}
+
+total_steps=7
+current_step=0
+
+update_progress() {
+    current_step=$((current_step + 1))
+    show_progress $current_step $total_steps
+    sleep 1
+}
+
 # 1. Uninstall all conflicting Docker packages.
-# Menghapus semua paket Docker yang mungkin konflik dengan instalasi Docker baru.
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do 
-    sudo apt-get remove -y $pkg
+    sudo apt-get remove -y $pkg > /dev/null 2>&1
 done
+update_progress
 
 # 2. Update package list dan install dependencies
-# Memperbarui daftar paket dan menginstal dependensi yang diperlukan seperti sertifikat CA dan curl.
-sudo apt-get update
-sudo apt-get install -y ca-certificates curl
+sudo apt-get update -qq > /dev/null 2>&1
+sudo apt-get install -y ca-certificates curl > /dev/null 2>&1
+update_progress
 
 # 3. Setup Docker GPG key
-# Membuat direktori untuk menyimpan keyring dan mengunduh kunci GPG Docker ke sistem.
 sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc > /dev/null 2>&1
+update_progress
 
 # 4. Set permission untuk keyring
-# Mengatur izin file agar keyring Docker dapat diakses dengan benar.
 sudo chmod a+r /etc/apt/keyrings/docker.asc
+update_progress
 
 # 5. Add Docker repository
-# Menambahkan repositori Docker ke dalam daftar sumber apt.
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+update_progress
 
 # 6. Update package list dengan repositori Docker baru
-# Memperbarui daftar paket lagi, kali ini termasuk repositori Docker.
-sudo apt-get update
+sudo apt-get update -qq > /dev/null 2>&1
+update_progress
 
 # 7. Install Docker packages
-# Menginstal paket Docker yang diperlukan.
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin > /dev/null 2>&1
+update_progress
 
-# 12. Write compose.yaml file
+echo -e "\nSetup complete!"
+
+# 8. Pilih VERSION
+echo -e "\n+----+-------------------------+----+----------------------------+"
+echo    "| No | Version                 | No | Version                    |"
+echo -e "+----+-------------------------+----+----------------------------+"
+echo    "| 1  | Windows 11 Pro          | 6  | Windows 8.1 Pro            |"
+echo    "| 2  | Windows 11 Enterprise   | 7  | Windows 8.1 Enterprise     |"
+echo    "| 3  | Windows 10 Pro          | 8  | Windows 7 Enterprise       |"
+echo    "| 4  | Windows 10 LTSC         | 9  | Windows Vista Enterprise   |"
+echo    "| 5  | Windows 10 Enterprise   | 10 | Windows XP Professional    |"
+echo    "| 11 | Windows Server 2022     | 14 | Windows Server 2012        |"
+echo    "| 12 | Windows Server 2019     | 15 | Windows Server 2008        |"
+echo    "| 13 | Windows Server 2016     |    |                            |"
+echo -e "+----+-------------------------+----+----------------------------+"
+
+while true; do
+  read -p "Pilih versi windows yang anda inginkan : " version_choice
+
+  case $version_choice in
+    1) VERSION="win11" ;;
+    2) VERSION="win11e" ;;
+    3) VERSION="win10" ;;
+    4) VERSION="ltsc10" ;;
+    5) VERSION="win10e" ;;
+    6) VERSION="win8" ;;
+    7) VERSION="win8e" ;;
+    8) VERSION="win7" ;;
+    9) VERSION="vista" ;;
+    10) VERSION="winxp" ;;
+    11) VERSION="2022" ;;
+    12) VERSION="2019" ;;
+    13) VERSION="2016" ;;
+    14) VERSION="2012" ;;
+    15) VERSION="2008" ;;
+    *) echo "Pilihan tidak valid. Silakan coba lagi."; continue ;;
+  esac
+  break
+done
+
+# 9. Input RAM size
+read -p "SEBELUM MENGINPUT, BACA DULU NOTE DI HALAMAN ANDA MENGAMBIL SCRIPT INI (Klik Enter jika paham)"
+
+read -p "Size RAM : " ram_size
+
+# 10. Input CPU cores
+read -p "CPU Core : " cpu_cores
+
+# 11. Input disk size
+read -p "Size Storage : " disk_size
+
+# 12. Input password
+read -p "Password RDP : " password
+
+# 13. Write compose.yaml file
 cat <<EOL > compose.yaml
 version: "3"
 services:
@@ -43,12 +138,12 @@ services:
     image: dockurr/windows
     container_name: windows
     environment:
-      VERSION: "11"
-      RAM_SIZE: "6G"
-      CPU_CORES: "4"
-      DISK_SIZE: "150G"
+      VERSION: "$VERSION"
+      RAM_SIZE: "${ram_size}G"
+      CPU_CORES: "${cpu_cores}"
+      DISK_SIZE: "${disk_size}G"
       USERNAME: "admin"
-      PASSWORD: "Renn@123ZONE"
+      PASSWORD: "${password}"
     devices:
       - /dev/kvm
     cap_add:
@@ -63,6 +158,5 @@ services:
       - /var/win10:/storage
 EOL
 
-# 13. Run
+# 14. Run
 sudo docker compose -f compose.yaml up -d
-```

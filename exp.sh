@@ -1,6 +1,3 @@
-<h1>Expired</h1>
-
-```bash
 #!/bin/bash
 
 # 1. Uninstall all conflicting Docker packages.

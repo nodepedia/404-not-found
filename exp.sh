@@ -501,7 +501,7 @@ echo -e "${CYAN}║${NC}                                                        
 echo -e "${CYAN}╠═══════════════════════════════════════════════════════════════════════════════════════════════════════╣${NC}"
 echo -e "${CYAN}║${NC}                                                                                                       ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}   ${DIM}Windows is now being installed. This may take 15-30 minutes.${NC}                                   ${CYAN}║${NC}"
-echo -e "${CYAN}║${NC}   ${DIM}Monitor progress via VNC at port 8006.${NC}                                                         ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}   ${DIM}Monitor progress at ${CYAN}http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'YOUR_IP'):8006${NC}                              ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}                                                                                                       ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}   ${YELLOW}Commands:${NC}                                                                                       ${CYAN}║${NC}"
 echo -e "${CYAN}║${NC}   ${DIM}• View logs:${NC}     docker logs -f windows                                                        ${CYAN}║${NC}"
